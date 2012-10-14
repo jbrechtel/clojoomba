@@ -1,9 +1,7 @@
 (ns clojoomba.core)
 
 (def cell-states [:clean :dirty])
-
-(defn row [size] (vec
-                   (map
+(defn row [size] (vec (map
                      (fn [_] (rand-nth cell-states))
                      (range size))))
 
@@ -21,17 +19,16 @@
                               curr  possible-states]
                              {:north north :south south :east east :west west :current curr}))
 
+(defn gen-agent [] (vec (map (fn [_] (rand-nth possible-actions)) state-permutations)))
+
 (def states (zipmap (vec state-permutations) (range (count state-permutations))))
 
 
 (defn score-action [action, state] (cond
                                      (and (= action :clean) (= (state :current) :dirty)) 10
                                      (and (= action :clean) (= (state :current) :clean)) -1
-                                     (= :wall (state action)) -5
+                                     (= :wall (state action))                            -5
                                      :else 0))
-
-;unfinished, next steps
-(defn update-room [room, x-pos, y-pos, action] room)
 
 (defn cell-state [room x-pos y-pos] (cond
                                          (> 0 x-pos)             :wall
@@ -49,14 +46,50 @@
 
 (defn random-direction [] (possible-directions (rand-int (count possible-directions))))
 
-(defn resolve-action [state genome] (let [gene-index   (states state)
-                                          action-index (genome gene-index)
-                                          action       (possible-actions action-index)]
+(defn resolve-action [state agent] (let [action-index (states state)
+                                         action       (agent action-index)]
                                       (if (= action :random) random-direction action)))
 
 (defn update-room [room action x-pos y-pos] (if (= action :clean)
                                               (assoc-in room [x-pos y-pos] :clean)
                                               room))
+
+(defn desired-pos [action x-pos y-pos] (cond
+                                         (= :north action) [x-pos (- y-pos 1)]
+                                         (= :south action) [x-pos (+ y-pos 1)]
+                                         (= :east  action) [(+ x-pos 1) y-pos]
+                                         (= :west  action) [(- x-pos 1) y-pos]
+                                         :else [x-pos y-pos]))
+
+(defn update-pos [action room x-pos y-pos] (let [[new-x new-y] (desired-pos action x-pos y-pos)]
+                                             (cond
+                                               (> 0 new-x) [x-pos y-pos]
+                                               (> 0 new-y) [x-pos y-pos]
+                                               (<= (count room) new-x) [x-pos y-pos]
+                                               (<= (count room) new-y) [x-pos y-pos]
+                                               :else [new-x new-y])))
+
+
+(defn step-agent [{:keys [room agent score x-pos y-pos]}]
+  (let [state         (agent-state room x-pos y-pos)
+        action        (resolve-action state agent)
+        new-room      (update-room room action x-pos y-pos)
+        [new-x new-y] (update-pos action room x-pos y-pos)
+        new-score     (+ score (score-action action state))]
+    {:agent agent :room new-room :x-pos new-x :y-pos new-y :score new-score}))
+
+(defn agent-time-series [agent room] (lazy-cat [{:agent agent :room room :x-pos 0 :y-pos 0 :score 0}]
+                                               (map step-agent (agent-time-series agent room))))
+
+(defn score-agent [agent room steps] (:score (last (take steps (agent-time-series agent room)))))
+
+(def james (gen-agent))
+(def home (gen-room 10))
+(def agents (map (fn [_] (gen-agent)) (range 20)))
+(println (map #(score-agent % home 10) agents))
+
+(def agent-count 30)
+(def initial-agents (map (fn [_] (gen-agent)) (range agent-count)))
 
 ;score an arbitrary genome against an arbitrary room for some number of steps
 ;start at 0,0
@@ -67,4 +100,3 @@
 ;-- calculate score for action and position
 ;-- calculate new room given action and position
 ;-- repeat
-(defn score-genome [genome room steps] 10)
