@@ -25,11 +25,6 @@
     mutate-agent pure-child))
 
 (defn evolve [{:keys [agents steps room-size num-rooms]}]
-  (if (not= (count agents) 10) (doall (println "##################")
-                                      (println (count agents))
-                                      (println agents)
-                                      (println "------------------")
-                                      (throw (Throwable. "wtf"))))
   (let [rooms  (gen-rooms num-rooms room-size)
         agent-count (count agents)
         scores (score-agents agents rooms steps)
@@ -40,9 +35,6 @@
         children (map breed parents-a parents-b)
         ]
       children))
-;     (println (breed (first parents-a) (first parents-b)))))
-;     (println (count (map breed parents-a parents-b)))))
-;     (doall (println (map count parents-a)))))
 
 (defn evolutions [{:keys [agents steps room-size num-rooms]}]
   (let [evolve-with-params (fn [current-agents] (evolve {:agents current-agents
