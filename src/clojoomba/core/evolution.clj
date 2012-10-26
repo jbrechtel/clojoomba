@@ -16,7 +16,16 @@
                                   rooms))])
     agents))
 
-(defn mutate-agent [agent] agent)
+(defn mutate-action [old-action] (rand-nth (remove possible-actions #(= % old-action))))
+
+(defn mutate-agent [agent] (let
+                             [agent-size       (count agent)
+                              mutation-percent (+ 1 (rand-int 3))
+                              mutation-total   (* (/ mutation-percent 100) agent-size)
+                              mutation-indexes (take mutation-total (repeatedly #(rand-int agent-size)))]
+                             (reduce #(update-in % [%2] mutate-action) agent mutation-indexes)))
+
+
 (defn breed [parent-a parent-b]
   (let [breed-index (rand (count parent-a))
         transmission-a (take breed-index parent-a)
@@ -40,6 +49,5 @@
   (let [evolve-with-params (fn [current-agents] (evolve {:agents current-agents
                                                         :steps steps
                                                         :room-size room-size
-                                                        :num-rooms num-rooms}))
-        next-generation (evolve-with-params agents)]
-    (lazy-cat [next-generation] (evolve-with-params next-generation))))
+                                                        :num-rooms num-rooms}))]
+        (iterate evolve-with-params agents)))
