@@ -4,8 +4,13 @@
      clojoomba.core.generation])
 
 
-(defn -main [& args]
-  (let [best (last (take 1000 (evolutions {:agents (gen-agents 200) :steps 200 :room-size 10 :num-rooms 100})))
-        best-score (score-agent best (gen-room 10) 200)]
+(defn -main [generations-str & args]
+  (let [generations (Integer/parseInt generations-str)
+        best-generation (last (take generations (evolutions {:agents (gen-agents 200) :steps 200 :room-size 10 :num-rooms 100})))
+        rooms (gen-rooms 100 10)
+        scored (score-agents best-generation rooms 200)
+        sorted (sort #(> (last %) (last %2)) scored)
+        best (first (first sorted))
+        best-score (last (first sorted))]
     (println best-score)
     (println best)))
