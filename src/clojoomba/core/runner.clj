@@ -11,10 +11,11 @@
        (time (run-for generations))))
 
 (defn run-for [generations]
-  (let [best-generation (last (take generations (evolutions {:agents (gen-agents 200) :steps 200 :room-size 10 :num-rooms 100})))
+  (let [best-generation (nth (evolutions {:agents (gen-agents 200) :steps 200 :room-size 10 :num-rooms 100}) generations)
         rooms (gen-rooms 100 10)
         scored (score-agents best-generation rooms 200)
         sorted (sort #(> (last %) (last %2)) scored)
         best (first (first sorted))
         best-score (last (first sorted))]
-    (println best-score)))
+    (println best-score)
+    (println best)))
