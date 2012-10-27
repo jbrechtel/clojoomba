@@ -42,7 +42,7 @@
 
 (defn step-agent [{:keys [room agent score x-pos y-pos]}]
   (let [state         (agent-state room x-pos y-pos)
-        action        ((vec agent) (states state))
+        action        (nth agent (states state))
         new-room      (update-room room action x-pos y-pos)
         [new-x new-y] (update-pos action room x-pos y-pos)
         new-score     (+ score (score-action action state))]
