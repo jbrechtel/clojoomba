@@ -2,14 +2,11 @@
     [:use clojoomba.core.states])
 
 (def cell-states [:clean :dirty])
-
-(defn row [size] (vec (map
-                     (fn [_] (rand-nth cell-states))
-                     (range size))))
-
 (def possible-actions [:north :south :east :west :random :stop :clean])
-(defn gen-agent [] (vec (map (fn [_] (rand-nth possible-actions)) state-permutations)))
-(defn gen-room [size] (vec (map row (repeat size size))))
 
-(defn gen-agents [agent-count] (map (fn [_] (gen-agent)) (range agent-count)))
-(defn gen-rooms  [room-count room-size]  (map (fn [_] (gen-room room-size))  (range room-count)))
+(defn row [size] (vec (take size (repeatedly #(rand-nth cell-states)))))
+(defn gen-room [size] (vec (take size (repeatedly #(row size)))))
+(defn gen-rooms  [room-count room-size]  (take room-count (repeatedly #(gen-room room-size))))
+
+(defn gen-agent [] (vec (take (count state-permutations) (repeatedly #(rand-nth possible-actions)))))
+(defn gen-agents [agent-count] (take agent-count (repeatedly gen-agent)))
