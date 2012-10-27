@@ -48,7 +48,5 @@
         new-score     (+ score (score-action action state))]
     {:agent agent :room new-room :x-pos new-x :y-pos new-y :score new-score}))
 
-;steps are off by 1
-;taking n from this yields n-1 actual steps since the first is equal to the input
 (defn agent-time-series [agent room]
   (iterate step-agent {:agent agent :room room :x-pos 0 :y-pos 0 :score 0}))
