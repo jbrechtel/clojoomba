@@ -2,11 +2,26 @@
     [:use
      clojoomba.core.generation
      clojoomba.core.scoring
-     clojoomba.core.agent-execution])
+     clojoomba.core.agent-execution
+     clojoomba.core.states])
 
 
 
-(defn score-agent [agent room steps] (:score (last (take steps (agent-time-series agent room)))))
+(defn score-agent [agent initial-room total-steps]
+  (loop [room initial-room
+         step 0
+         score 0
+         x-pos 0
+         y-pos 0]
+    (if (= step total-steps)
+      score
+      (let [state         (agent-state room x-pos y-pos)
+            action        (nth agent (states state))
+            new-room      (update-room room action x-pos y-pos)
+            [new-x new-y] (update-pos action room x-pos y-pos)
+            new-score     (+ score (score-action action state))
+            next-step     (+ 1 step)]
+        (recur new-room next-step new-score new-x new-y)))))
 
 (defn average [nums] (/ (reduce + nums) (count nums)))
 (defn score-agents [agents rooms steps]

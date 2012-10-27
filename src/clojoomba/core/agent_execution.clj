@@ -39,14 +39,3 @@
       (<= (count room) new-x) [x-pos y-pos]
       (<= (count room) new-y) [x-pos y-pos]
       :else [new-x new-y])))
-
-(defn step-agent [{:keys [room agent score x-pos y-pos]}]
-  (let [state         (agent-state room x-pos y-pos)
-        action        (nth agent (states state))
-        new-room      (update-room room action x-pos y-pos)
-        [new-x new-y] (update-pos action room x-pos y-pos)
-        new-score     (+ score (score-action action state))]
-    {:agent agent :room new-room :x-pos new-x :y-pos new-y :score new-score}))
-
-(defn agent-time-series [agent room]
-  (iterate step-agent {:agent agent :room room :x-pos 0 :y-pos 0 :score 0}))
