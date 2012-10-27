@@ -10,7 +10,7 @@
 
 (defn average [nums] (/ (reduce + nums) (count nums)))
 (defn score-agents [agents rooms steps]
-  (map
+  (pmap
     (fn [agent] [agent,(average (map
                                   (fn [room] (score-agent agent room steps))
                                   rooms))])
