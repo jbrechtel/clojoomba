@@ -3,7 +3,8 @@
      clojoomba.core.generation
      clojoomba.core.scoring
      clojoomba.core.agent-execution
-     clojoomba.core.states])
+     clojoomba.core.states
+     clojoomba.core.weighted-random-selection])
 
 
 
@@ -52,13 +53,8 @@
   (let [rooms  (gen-rooms num-rooms room-size)
         agent-count (count agents)
         scores (score-agents agents rooms steps)
-        sorted-agents (map first (sort #(> (last %) (last %2)) scores))
-        agents-to-breed (repeatedly #(rand-nth (take (+ 1 (rand-int (count scores))) sorted-agents)))
-        all-parents (take (* 2 agent-count) agents-to-breed)
-        parents-a (take agent-count all-parents)
-        parents-b (drop agent-count all-parents)
-        children (map breed parents-a parents-b)
-        ]
+        agents-to-breed (take agent-count (random-pairs-weighted scores))
+        children (map breed (map first agents-to-breed) (map last agents-to-breed))]
       children))
 
 (defn evolutions [{:keys [agents steps room-size num-rooms]}]
