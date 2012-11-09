@@ -32,14 +32,14 @@
                                   rooms))])
     agents))
 
-(defn mutate-action [old-action] (rand-nth (remove possible-actions #(= % old-action))))
+(defn mutate-action [old-action] (rand-nth (remove #(= % old-action) possible-actions)))
 
 (defn mutate-agent [agent] (let
                              [agent-size       (count agent)
                               mutation-percent (+ 1 (rand-int 10))
                               mutation-total   (* (/ mutation-percent 100) agent-size)
-                              mutation-indexes (take mutation-total (repeatedly #(rand-int agent-size)))]
-                             (reduce #(update-in % [%2] mutate-action) agent mutation-indexes)))
+                              mutation-indexes (vec (take mutation-total (repeatedly #(rand-int agent-size))))]
+                             (reduce #(update-in % [%2] mutate-action) (vec agent) mutation-indexes)))
 
 
 (defn breed [parent-a parent-b]
@@ -47,7 +47,7 @@
         transmission-a (take breed-index parent-a)
         transmission-b (drop breed-index parent-b)
         pure-child (concat transmission-a transmission-b)]
-    mutate-agent pure-child))
+    (mutate-agent pure-child)))
 
 (defn evolve [{:keys [agents steps room-size num-rooms]}]
   (let [rooms  (gen-rooms num-rooms room-size)
