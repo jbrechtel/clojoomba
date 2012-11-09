@@ -42,13 +42,14 @@
 
 
 (defn breed [[parent-a parent-b]]
-  (let [breed-index (rand (count parent-a))
-        child-a-transmission-a (take breed-index parent-a)
-        child-a-transmission-b (drop breed-index parent-b)
-        child-b-transmission-a (drop breed-index parent-a)
-        child-b-transmission-b (take breed-index parent-b)
-        child-a (concat child-a-transmission-a child-a-transmission-b)
-        child-b (concat child-b-transmission-a child-b-transmission-b)]
+  (let [size (count parent-a)
+        breed-index (rand size)
+        child-a-transmission-a (subvec parent-a 0 breed-index)
+        child-a-transmission-b (subvec parent-b breed-index size)
+        child-b-transmission-a (subvec parent-b 0 breed-index)
+        child-b-transmission-b (subvec parent-a breed-index size)
+        child-a (into child-a-transmission-a child-a-transmission-b)
+        child-b (into child-b-transmission-a child-b-transmission-b)]
     [(mutate-agent child-a) (mutate-agent child-b)]))
 
 (defn evolve [{:keys [agents steps room-size num-rooms]}]
