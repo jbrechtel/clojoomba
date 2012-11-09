@@ -62,7 +62,7 @@
         min-score (apply min scores-only)
         min-score-abs (if (> 0 min-score) (* -1 min-score) min-score)
         normalized-scores (map (fn [[agent score]] [agent (+ min-score-abs score)]) scores)
-        agents-to-breed (take agent-count (random-pairs-weighted normalized-scores))
+        agents-to-breed (take (/ agent-count 2) (random-pairs-weighted normalized-scores))
         children (apply concat (map breed agents-to-breed))]
       (println (str "max score: " (float max-score) " avg score: " (float avg-score)))
       children))
