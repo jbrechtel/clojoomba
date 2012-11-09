@@ -36,10 +36,9 @@
 
 (defn mutate-agent [agent] (let
                              [agent-size       (count agent)
-                              mutation-percent (+ 1 (rand-int 10))
-                              mutation-total   (* (/ mutation-percent 100) agent-size)
+                              mutation-total   (* (/ (rand) 100) agent-size)
                               mutation-indexes (vec (take mutation-total (repeatedly #(rand-int agent-size))))]
-                             (reduce #(update-in % [%2] mutate-action) (vec agent) mutation-indexes)))
+                             (vec (reduce #(update-in % [%2] mutate-action) (vec agent) mutation-indexes))))
 
 
 (defn breed [[parent-a parent-b]]
@@ -68,8 +67,8 @@
       children))
 
 (defn evolutions [{:keys [agents steps room-size num-rooms]}]
-  (let [evolve-with-params (fn [current-agents] (evolve {:agents current-agents
+  (let [evolve-with-params (fn [current-agents] (time (evolve {:agents current-agents
                                                         :steps steps
                                                         :room-size room-size
-                                                        :num-rooms num-rooms}))]
+                                                        :num-rooms num-rooms})))]
         (iterate evolve-with-params agents)))
