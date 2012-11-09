@@ -42,12 +42,15 @@
                              (reduce #(update-in % [%2] mutate-action) (vec agent) mutation-indexes)))
 
 
-(defn breed [parent-a parent-b]
+(defn breed [[parent-a parent-b]]
   (let [breed-index (rand (count parent-a))
-        transmission-a (take breed-index parent-a)
-        transmission-b (drop breed-index parent-b)
-        pure-child (concat transmission-a transmission-b)]
-    (mutate-agent pure-child)))
+        child-a-transmission-a (take breed-index parent-a)
+        child-a-transmission-b (drop breed-index parent-b)
+        child-b-transmission-a (drop breed-index parent-a)
+        child-b-transmission-b (take breed-index parent-b)
+        child-a (concat child-a-transmission-a child-a-transmission-b)
+        child-b (concat child-b-transmission-a child-b-transmission-b)]
+    [(mutate-agent child-a) (mutate-agent child-b)]))
 
 (defn evolve [{:keys [agents steps room-size num-rooms]}]
   (let [rooms  (gen-rooms num-rooms room-size)
@@ -61,7 +64,7 @@
         normalized-scores (map (fn [[agent score]] [agent (+ min-score-abs score)]) scores)
 ;       normalized-scores (map #([(first %) (+ min-score (last %))]) scores)
         agents-to-breed (take agent-count (random-pairs-weighted normalized-scores))
-        children (map breed (map first agents-to-breed) (map last agents-to-breed))]
+        children (apply concat (map breed agents-to-breed))]
       (println (str "max score: " (float max-score) " avg score: " (float avg-score)))
       children))
 
