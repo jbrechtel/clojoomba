@@ -35,7 +35,7 @@
 
 (defn mutate-agent [agent] (let
                              [agent-size       (count agent)
-                              mutation-total   (* (/ (rand) 100) agent-size)
+                              mutation-total   (* (/ (/ (rand) 2) 100) agent-size)
                               mutation-indexes (vec (take mutation-total (repeatedly #(rand-int agent-size))))]
                              (vec (reduce #(update-in % [%2] mutate-action) (vec agent) mutation-indexes))))
 
@@ -56,12 +56,11 @@
         agent-count (count agents)
         scores (score-agents agents rooms steps)
         scores-only (map last scores)
+        sorted-scores (sort #(< (last %) (last %2)) scores)
+        weighted-scores (map-indexed #(assoc %2 1 (+ 1 %)) sorted-scores)
         max-score (apply max scores-only)
         avg-score (average scores-only)
-        min-score (apply min scores-only)
-        min-score-abs (if (> 0 min-score) (* -1 min-score) min-score)
-        normalized-scores (map (fn [[agent score]] [agent (+ min-score-abs score)]) scores)
-        agents-to-breed (take (/ agent-count 2) (random-pairs-weighted normalized-scores))
+        agents-to-breed (take (/ agent-count 2) (random-pairs-weighted weighted-scores))
         children (apply concat (map breed agents-to-breed))]
       (log-stats max-score avg-score)
       children))
