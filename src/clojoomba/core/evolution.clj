@@ -4,9 +4,8 @@
      clojoomba.core.scoring
      clojoomba.core.agent-execution
      clojoomba.core.states
-     clojoomba.core.weighted-random-selection])
-
-
+     clojoomba.core.weighted-random-selection
+     clojoomba.core.logging])
 
 (defn score-agent [agent initial-room total-steps]
   (loop [room initial-room
@@ -64,12 +63,12 @@
         normalized-scores (map (fn [[agent score]] [agent (+ min-score-abs score)]) scores)
         agents-to-breed (take (/ agent-count 2) (random-pairs-weighted normalized-scores))
         children (apply concat (map breed agents-to-breed))]
-      (println (str "max score: " (float max-score) " avg score: " (float avg-score)))
+      (log-stats max-score avg-score)
       children))
 
 (defn evolutions [{:keys [agents steps room-size num-rooms]}]
-  (let [evolve-with-params (fn [current-agents] (time (evolve {:agents current-agents
+  (let [evolve-with-params (fn [current-agents] (evolve {:agents current-agents
                                                         :steps steps
                                                         :room-size room-size
-                                                        :num-rooms num-rooms})))]
+                                                        :num-rooms num-rooms}))]
         (iterate evolve-with-params agents)))
