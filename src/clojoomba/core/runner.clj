@@ -4,13 +4,6 @@
      clojoomba.core.generation
      clojoomba.core.logging])
 
-(declare run-for)
-
-
-(defn -main [generations-str & args]
-  (let [generations (Integer/parseInt generations-str)]
-       (time (run-for generations))))
-
 (defn run-for [generations]
   (init-log)
   (let [best-generation (nth (evolutions {:agents (gen-agents 200) :steps 200 :room-size 10 :num-rooms 100}) generations)
@@ -21,3 +14,8 @@
         best-score (last (first sorted))]
     (println best-score)
     (println best)))
+
+(defn -main [generations-str & args]
+  (let [generations (Integer/parseInt generations-str)]
+       (run-for generations)
+       (. clojure.lang.Agent shutdown)))
